@@ -1,27 +1,26 @@
 package com.example.usb_host;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
 import android.app.Activity;
 import android.content.Context;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
-	Context mContext = getApplicationContext();
-	UsbManager mManager = (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
+	private static final String TAG = MainActivity.class.getSimpleName();
+	Context mContext = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.d(TAG, "[onCreate] enter...");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		detection.run();
+		mContext = getApplicationContext();
+		showDetectStatusTask sdst = new showDetectStatusTask(mContext);
+		detectTask dt = new detectTask(mContext, sdst);
+		detectManager.getDetectManager().runDetectionTask(dt);
 	}
 
 	@Override
@@ -42,26 +41,4 @@ public class MainActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
-	private Runnable detection = new Runnable(){
-		@Override
-	    public void run() {
-			while(true)
-			{
-				HashMap<String, UsbDevice> deviceList = mManager.getDeviceList();
-				Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
-				if(deviceIterator.hasNext()){
-					UsbDevice device = deviceList.get("deviceName");
-					Toast.makeText(mContext, device.getDeviceName(), Toast.LENGTH_LONG).show();
-				}
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-	    }
-		
-	};
 }
